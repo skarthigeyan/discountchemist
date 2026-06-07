@@ -1,12 +1,11 @@
-"use client";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { format } from "date-fns";
+import { HeroBannerCarousel } from "@/components/hero-banner-carousel";
+import { getSaleProducts, type SaleProduct } from "@/data/products";
 import {
   ChevronDown,
   Heart,
@@ -15,11 +14,9 @@ import {
   Phone,
   Search,
   ShoppingCart,
-  Star,
   Truck,
   User,
 } from "lucide-react";
-import { useState } from "react";
 
 const NAV_CATEGORIES = [
   { label: "Vitamins & Supplements", href: "#" },
@@ -32,157 +29,36 @@ const NAV_CATEGORIES = [
   { label: "Pharmacy", href: "#" },
 ];
 
-const SALE_ITEMS = [
-  {
-    id: 1,
-    name: "Blackmores Bio C 1000mg Tablets 62 Pack",
-    brand: "Blackmores",
-    originalPrice: 24.99,
-    salePrice: 14.99,
-    discountPct: 40,
-    rating: 4.5,
-    reviews: 128,
-    image: null,
-    badge: "40% OFF",
-    expiryDate: new Date("2026-06-30"),
-  },
-  {
-    id: 2,
-    name: "Swisse Ultiboost Hair Skin Nails 100 Tablets",
-    brand: "Swisse",
-    originalPrice: 39.99,
-    salePrice: 19.99,
-    discountPct: 50,
-    rating: 4.7,
-    reviews: 245,
-    image: null,
-    badge: "50% OFF",
-    expiryDate: new Date("2026-06-30"),
-  },
-  {
-    id: 3,
-    name: "Neutrogena Hydro Boost Water Gel 50g",
-    brand: "Neutrogena",
-    originalPrice: 34.99,
-    salePrice: 22.49,
-    discountPct: 36,
-    rating: 4.6,
-    reviews: 312,
-    image: null,
-    badge: "SALE",
-    expiryDate: new Date("2026-06-25"),
-  },
-  {
-    id: 4,
-    name: "Elevit Pregnancy Multivitamin 100 Tablets",
-    brand: "Elevit",
-    originalPrice: 49.99,
-    salePrice: 32.99,
-    discountPct: 34,
-    rating: 4.8,
-    reviews: 189,
-    image: null,
-    badge: "34% OFF",
-    expiryDate: new Date("2026-07-15"),
-  },
-  {
-    id: 5,
-    name: "Natio Rosehip Face Oil 50mL",
-    brand: "Natio",
-    originalPrice: 19.99,
-    salePrice: 11.99,
-    discountPct: 40,
-    rating: 4.3,
-    reviews: 87,
-    image: null,
-    badge: "40% OFF",
-    expiryDate: new Date("2026-06-30"),
-  },
-  {
-    id: 6,
-    name: "Nature's Own Magnesium 500mg 200 Tablets",
-    brand: "Nature's Own",
-    originalPrice: 29.99,
-    salePrice: 17.99,
-    discountPct: 40,
-    rating: 4.4,
-    reviews: 156,
-    image: null,
-    badge: "40% OFF",
-    expiryDate: new Date("2026-07-01"),
-  },
-  {
-    id: 7,
-    name: "Ego QV Gentle Wash 500mL",
-    brand: "Ego QV",
-    originalPrice: 14.99,
-    salePrice: 9.49,
-    discountPct: 37,
-    rating: 4.6,
-    reviews: 203,
-    image: null,
-    badge: "SALE",
-    expiryDate: new Date("2026-06-28"),
-  },
-  {
-    id: 8,
-    name: "Faulding Melatonin 1mg 60 Tablets",
-    brand: "Faulding",
-    originalPrice: 16.99,
-    salePrice: 10.99,
-    discountPct: 35,
-    rating: 4.2,
-    reviews: 94,
-    image: null,
-    badge: "35% OFF",
-    expiryDate: new Date("2026-07-10"),
-  },
-];
-
-const HERO_BANNERS = [
-  { headline: "Up to 50% Off Vitamins", sub: "Shop our biggest sale of the year on top brands", cta: "Shop Now", color: "from-green-600 to-teal-500" },
-  { headline: "Beauty Deals Up to 40% Off", sub: "Premium skincare and beauty at unbeatable prices", cta: "Explore Deals", color: "from-pink-500 to-rose-400" },
-  { headline: "Free Delivery Over $50", sub: "Australia-wide delivery on all pharmacy orders", cta: "Start Shopping", color: "from-blue-600 to-cyan-500" },
-];
-
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <Star
-          key={s}
-          className={`h-3 w-3 ${s <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
-        />
-      ))}
-    </div>
-  );
+function discountBadge(price: string, compareAtPrice: string | null): string {
+  if (!compareAtPrice) return "SALE";
+  const pct = Math.round((1 - parseFloat(price) / parseFloat(compareAtPrice)) * 100);
+  return `${pct}% OFF`;
 }
 
-function ProductCard({ item }: { item: (typeof SALE_ITEMS)[0] }) {
+function ProductCard({ item }: { item: SaleProduct }) {
+  const badge = discountBadge(item.price, item.compareAtPrice);
+
   return (
     <Card className="group relative flex flex-col overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow duration-200">
       <div className="relative bg-gray-50 h-44 flex items-center justify-center">
         <Package className="h-20 w-20 text-gray-300" />
         <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-500 text-white text-xs font-bold">
-          {item.badge}
+          {badge}
         </Badge>
         <button className="absolute top-2 right-2 p-1.5 rounded-full bg-white shadow hover:bg-pink-50 transition-colors">
           <Heart className="h-4 w-4 text-gray-400 group-hover:text-pink-500 transition-colors" />
         </button>
       </div>
       <CardContent className="flex flex-col flex-1 p-3 gap-2">
-        <p className="text-[11px] font-semibold text-green-700 uppercase tracking-wide">{item.brand}</p>
+        {item.categoryName && (
+          <p className="text-[11px] font-semibold text-green-700 uppercase tracking-wide">{item.categoryName}</p>
+        )}
         <p className="text-sm text-gray-800 font-medium leading-snug line-clamp-2">{item.name}</p>
-        <div className="flex items-center gap-1 mt-auto">
-          <StarRating rating={item.rating} />
-          <span className="text-xs text-gray-500">({item.reviews})</span>
-        </div>
-        <p className="text-[11px] text-gray-400">
-          Sale ends {format(item.expiryDate, "do MMM yyyy")}
-        </p>
-        <div className="flex items-baseline gap-2">
-          <span className="text-lg font-bold text-gray-900">${item.salePrice.toFixed(2)}</span>
-          <span className="text-sm line-through text-gray-400">${item.originalPrice.toFixed(2)}</span>
+        <div className="flex items-baseline gap-2 mt-auto">
+          <span className="text-lg font-bold text-gray-900">${parseFloat(item.price).toFixed(2)}</span>
+          {item.compareAtPrice && (
+            <span className="text-sm line-through text-gray-400">${parseFloat(item.compareAtPrice).toFixed(2)}</span>
+          )}
         </div>
         <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white mt-1">
           <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
@@ -193,9 +69,8 @@ function ProductCard({ item }: { item: (typeof SALE_ITEMS)[0] }) {
   );
 }
 
-export default function Home() {
-  const [activeBanner, setActiveBanner] = useState(0);
-  const banner = HERO_BANNERS[activeBanner];
+export default async function Home() {
+  const saleProducts = await getSaleProducts();
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -293,33 +168,7 @@ export default function Home() {
       </header>
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-8">
-        {/* Hero banner */}
-        <section className={`rounded-2xl bg-gradient-to-r ${banner.color} text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6`}>
-          <div className="flex flex-col gap-3">
-            <Badge className="w-fit bg-white/20 hover:bg-white/20 text-white border-0">This Week Only</Badge>
-            <h1 className="text-3xl md:text-4xl font-black leading-tight">{banner.headline}</h1>
-            <p className="text-white/80 text-sm md:text-base max-w-sm">{banner.sub}</p>
-            <Button className="w-fit mt-2 bg-white text-green-700 hover:bg-white/90 font-bold">
-              {banner.cta}
-            </Button>
-          </div>
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-36 w-36 rounded-full bg-white/20 flex items-center justify-center">
-              <Package className="h-20 w-20 text-white/60" />
-            </div>
-          </div>
-        </section>
-
-        {/* Banner tabs */}
-        <div className="flex gap-2 justify-center">
-          {HERO_BANNERS.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveBanner(i)}
-              className={`h-2 rounded-full transition-all ${i === activeBanner ? "w-8 bg-green-600" : "w-2 bg-gray-300"}`}
-            />
-          ))}
-        </div>
+        <HeroBannerCarousel />
 
         {/* Deals section */}
         <section>
@@ -332,11 +181,15 @@ export default function Home() {
               View All Deals
             </Button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
-            {SALE_ITEMS.map((item) => (
-              <ProductCard key={item.id} item={item} />
-            ))}
-          </div>
+          {saleProducts.length === 0 ? (
+            <p className="text-sm text-gray-500">No deals available right now. Check back soon.</p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+              {saleProducts.map((item) => (
+                <ProductCard key={item.id} item={item} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Category quick links */}
