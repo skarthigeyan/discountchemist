@@ -16,6 +16,7 @@ export const products = pgTable('products', {
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   description: text('description'),
   price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+  compareAtPrice: numeric('compare_at_price', { precision: 10, scale: 2 }),
   stock: integer('stock').notNull().default(0),
   images: text('images').array(),
   isActive: boolean('is_active').notNull().default(true),
