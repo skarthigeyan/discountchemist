@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { HeroBannerCarousel } from "@/components/hero-banner-carousel";
+import { NavCategoryBar } from "@/components/nav-category-bar";
+import { NAV_CATEGORIES } from "@/data/nav-categories";
 import { getSaleProducts, type SaleProduct } from "@/data/products";
 import {
-  ChevronDown,
   Heart,
   Menu,
   Package,
@@ -18,16 +19,6 @@ import {
   User,
 } from "lucide-react";
 
-const NAV_CATEGORIES = [
-  { label: "Vitamins & Supplements", href: "#" },
-  { label: "Beauty & Skincare", href: "#" },
-  { label: "Baby & Kids", href: "#" },
-  { label: "Health & Wellness", href: "#" },
-  { label: "Personal Care", href: "#" },
-  { label: "Weight Management", href: "#" },
-  { label: "Sports Nutrition", href: "#" },
-  { label: "Pharmacy", href: "#" },
-];
 
 function discountBadge(price: string, compareAtPrice: string | null): string {
   if (!compareAtPrice) return "SALE";
@@ -98,7 +89,7 @@ export default async function Home() {
                 {NAV_CATEGORIES.map((cat) => (
                   <a
                     key={cat.label}
-                    href={cat.href}
+                    href="#"
                     className="px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
                   >
                     {cat.label}
@@ -147,24 +138,7 @@ export default async function Home() {
           </div>
         </div>
 
-        {/* Category nav */}
-        <nav className="hidden lg:block border-t border-gray-100 bg-green-700">
-          <div className="max-w-7xl mx-auto px-4">
-            <ul className="flex items-center gap-0">
-              {NAV_CATEGORIES.map((cat) => (
-                <li key={cat.label}>
-                  <a
-                    href={cat.href}
-                    className="flex items-center gap-1 px-3 py-2.5 text-xs font-medium text-white hover:bg-green-800 transition-colors whitespace-nowrap"
-                  >
-                    {cat.label}
-                    <ChevronDown className="h-3 w-3 opacity-60" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </nav>
+        <NavCategoryBar />
       </header>
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-8">
