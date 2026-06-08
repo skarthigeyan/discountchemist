@@ -37,6 +37,23 @@ Full standards are documented in [`docs/data-fetching.md`](docs/data-fetching.md
 - **`/data` directory** — ALL database queries must go through helper functions in `src/data/`. Never query the database directly from a page or component.
 - **Drizzle ORM only** — All `src/data/` helpers must use Drizzle ORM. No raw SQL, no other query builders.
 
+## Data Mutations
+
+Full standards are documented in [`docs/data-mutations.md`](docs/data-mutations.md). The non-negotiable rules:
+
+- **`/data` directory** — ALL database mutations must go through helper functions in `src/data/`. Never call Drizzle directly from a Server Action or component.
+- **Server Actions only** — ALL mutations must be triggered via Server Actions in a colocated `actions.ts` file (e.g. `src/app/products/actions.ts`).
+- **Typed params, no FormData** — Every Server Action must declare typed parameters. Never accept `FormData`.
+- **Zod validation** — Every Server Action must validate its arguments with Zod before doing anything else.
+
+## Authentication
+
+Full standards are documented in [`docs/auth.md`](docs/auth.md). The non-negotiable rules:
+
+- **Clerk only** — ALL authentication must use Clerk. No custom auth, NextAuth, or any other provider.
+- **Middleware** — Route protection must be handled via `clerkMiddleware` in `src/middleware.ts`. Never gate routes inside pages.
+- **No custom session logic** — Do not store session tokens or user identity yourself. Let Clerk own all session state.
+
 ## UI Standards
 
 Full standards are documented in [`docs/ui.md`](docs/ui.md). The non-negotiable rules:
